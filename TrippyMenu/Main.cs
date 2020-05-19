@@ -69,23 +69,6 @@ namespace TrippyMenu
         public override void OnApplicationStart()
         {
             LoadConfig();
-
-            Instance instance = Manager.CreateInstance("TrippyMenu");
-
-            OptionsMenu_ShowPage = instance.Patch(SDK.GetClass("OptionsMenu").GetMethod("ShowPage"), typeof(TrippyMenu).GetMethod("ShowPage"));
-            MelonModLogger.Log("Patch applied");
-        }
-
-        public static unsafe void ShowPage(IntPtr @this, OptionsMenu.Page page)
-        {
-            MelonModLogger.Log("Hi");
-            OptionsMenu_ShowPage.InvokeOriginal(@this, new IntPtr[]
-            {
-                new IntPtr((void*)(&page))
-            });
-            MelonModLogger.Log("Hi");
-
-            
         }
 
         public override void OnUpdate()
@@ -99,6 +82,8 @@ namespace TrippyMenu
                 if (menuState == MenuState.State.Launched)
                 {
                     GameplayModifiers.I.mPsychedeliaPhase = 0;
+                    timer = 0;
+                    
                 }
                 oldMenuState = menuState;
             }
@@ -145,6 +130,8 @@ namespace TrippyMenu
                                         config.activated = false;
                                         toggleButton.label.text = "OFF";
                                         SaveConfig();
+                                        GameplayModifiers.I.mPsychedeliaPhase = 0;
+                                        timer = 0;
                                     }
                                     else
                                     {
