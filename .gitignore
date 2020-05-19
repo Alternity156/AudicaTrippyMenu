@@ -1,0 +1,6 @@
+
+*.cache
+*.CopyComplete
+TrippyMenu/obj/Release/TrippyMenu.csproj.FileListAbsolute.txt
+*.dll
+*.pdb
