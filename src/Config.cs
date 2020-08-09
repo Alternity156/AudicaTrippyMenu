@@ -1,4 +1,4 @@
-﻿namespace TrippyMenu
+﻿namespace AudicaModding
 {
     public class Config
     {

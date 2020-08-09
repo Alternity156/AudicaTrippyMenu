@@ -1,7 +1,7 @@
 ﻿using MelonLoader;
 using SimpleJSON;
 
-namespace TrippyMenu
+namespace AudicaModding
 {
     public class Encoder
     {
