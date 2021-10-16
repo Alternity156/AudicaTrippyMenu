@@ -1,134 +1,77 @@
 using System;
-using System.Collections.Generic;
+using Harmony;
 using MelonLoader;
 using UnityEngine;
-using Harmony;
-using System.IO;
+using System.Reflection;
 
 namespace AudicaModding
 {
+    public static class Config
+    {
+        public const string Category = "TrippyMenu";
+
+        public static bool Enabled;
+        public static float Speed;
+
+        public static void RegisterConfig()
+        {
+            MelonPrefs.RegisterBool(Category, nameof(Enabled), false, "Enables psychedelia.");
+            MelonPrefs.RegisterFloat(Category, nameof(Speed), 1.0f, "Cycle speed [0.1,100,0.1,1]");
+            OnModSettingsApplied();
+        }
+
+        public static void OnModSettingsApplied()
+        {
+            foreach (var fieldInfo in typeof(Config).GetFields(BindingFlags.Static | BindingFlags.Public))
+            {
+                if (fieldInfo.FieldType == typeof(bool))
+                    fieldInfo.SetValue(null, MelonPrefs.GetBool(Category, fieldInfo.Name));
+
+                if (fieldInfo.FieldType == typeof(float))
+                    fieldInfo.SetValue(null, MelonPrefs.GetFloat(Category, fieldInfo.Name));
+            }
+        }
+    }
+
     public class AudicaMod : MelonMod
     {
-        public static bool playPsychadelia = false;
-
-        public static bool menuSpawned = false;
-        public static OptionsMenuButton toggleButton = null;
-        public static OptionsMenuSlider speedSlider = null;
-
-        public static float timer = 0.0f;
-        public static float defaultPhaseSeconds = 14.28f;
-
-        public static Config config = new Config();
-        public static string path = Application.dataPath + "/../Mods/Config/TrippyMenu.json";
-
         public static class BuildInfo
         {
             public const string Name = "TrippyMenus";  // Name of the Mod.  (MUST BE SET)
             public const string Author = "Alternity"; // Author of the Mod.  (Set as null if none)
             public const string Company = null; // Company that made the Mod.  (Set as null if none)
-            public const string Version = "1.1.2"; // Version of the Mod.  (MUST BE SET)
+            public const string Version = "1.1.4"; // Version of the Mod.  (MUST BE SET)
             public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)
         }
-        
-		 public override void OnApplicationStart()
-         {
-            HarmonyInstance instance = HarmonyInstance.Create("AudicaMod");
-            Hooks.ApplyHooks(instance);
-            LoadConfig();
-         }
 
-        public static void SaveConfig()
+        public override void OnApplicationStart()
         {
-            Directory.CreateDirectory(Application.dataPath + "/../Mods/Config");
-            string contents = Encoder.GetConfig(config);
-            File.WriteAllText(path, contents);
-            MelonModLogger.Log("Config saved");
+            Config.RegisterConfig();
         }
 
-        public static void LoadConfig()
+        public override void OnModSettingsApplied()
         {
-            if (!File.Exists(path))
-            {
-                SaveConfig();
-            }
-            Encoder.SetConfig(config, File.ReadAllText(path));
-            MelonModLogger.Log("Config loaded");
+            Config.OnModSettingsApplied();
         }
 
-        public static void UpdateSlider(OptionsMenuSlider slider, string text)
+        private static bool playPsychedelia => Config.Enabled;
+        private static float speed => Config.Speed;
+
+        public static float timer = 0.0f;
+        public static float defaultPhaseSeconds = 14.28f;
+
+        public static void InSong()
         {
-            if (slider == null)
-            {
-                return;
-            }
-            else
-            {
-                slider.label.text = text;
-                SaveConfig();
-            }
-        }
-
-        public static void CreateSettingsButton(OptionsMenu optionsMenu)
-        {
-            string toggleText = "OFF";
-
-            if (config.activated)
-            {
-                toggleText = "ON";
-            }
-
-            optionsMenu.AddHeader(0, "Trippy Menu");
-
-            toggleButton = optionsMenu.AddButton
-                (0,
-                toggleText,
-                new Action(() =>
-                {
-                    if (config.activated)
-                    {
-                        config.activated = false;
-                        playPsychadelia = false;
-                        toggleButton.label.text = "OFF";
-                        SaveConfig();
-                        GameplayModifiers.I.mPsychedeliaPhase = 0.00000001f;
-                        timer = 0;
-                    }
-                    else
-                    {
-                        config.activated = true;
-                        playPsychadelia = true;
-                        toggleButton.label.text = "ON";
-                        SaveConfig();
-                    }
-                }),
-                null,
-                "Turns Trippy Menu on or off");
-
-            speedSlider = optionsMenu.AddSlider
-                (
-                0,
-                "Trippy Menu Cycle Speed",
-                "P",
-                new Action<float>((float n) =>
-                {
-                    config.speed = Mathf.Round((config.speed + n) * 1000.0f) / 1000.0f;
-                    UpdateSlider(speedSlider, "Speed : " + config.speed.ToString());
-                }),
-                null,
-                null,
-                "Changes color cycle speed"
-                );
-            speedSlider.label.text = "Speed : " + config.speed.ToString();
-
-            //MelonModLogger.Log("Buttons created");
-            menuSpawned = true;
+            Config.Enabled = false;
+            GameplayModifiers.I.mPsychedeliaPhase = 0;
+            timer = 0;
         }
 
         public override void OnUpdate()
         {
-            if (!playPsychadelia) return;
+            if (!playPsychedelia) return;
 
-            float phaseTime = defaultPhaseSeconds / config.speed;
+            float phaseTime = defaultPhaseSeconds / speed;
 
             if (timer <= phaseTime)
             {
@@ -140,63 +83,28 @@ namespace AudicaModding
             else timer = 0;
         }
     }
+
+    internal static class Hooks
+    {
+        [HarmonyPatch(typeof(MenuState), "SetState", new Type[] { typeof(MenuState.State) })]
+        private static class PatchSetState
+        {
+            private static void Postfix(MenuState __instance, ref MenuState.State state)
+            {
+                if (Config.Enabled == false) return;
+
+                if (Config.Enabled && (state == MenuState.State.Launched || state == MenuState.State.TitleScreen))
+                {
+
+                }
+                else if (!Config.Enabled && state != MenuState.State.Launched && state != MenuState.State.TitleScreen) Config.Enabled = true;
+
+
+
+            }
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B7D56B34-A0C1-4C0D-AD01-8CB350F48834}</ProjectGuid>
+    <ProjectGuid>{B450DB87-100F-446D-BA5F-93B6E9042F46}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudicaModding</RootNamespace>
+    <RootNamespace>TrippyMenus</RootNamespace>
     <AssemblyName>TrippyMenus</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -181,15 +181,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Config.cs" />
-    <Compile Include="src\Encoder.cs" />
-    <Compile Include="src\Hooks.cs" />
     <Compile Include="src\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Util\SimpleJSON.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "D:\Games\Steam\steamapps\common\Audica\Mods\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "G:\Oculus\Software\Software\harmonix-project-k\Mods\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

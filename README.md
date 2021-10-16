@@ -1,4 +1,4 @@
 # AudicaTrippyMenu
  Psychedelia in menus
 
-To enable go in Settings > Misc.
+Enable in the ModPrefs file or using the Mod Settings mod.
